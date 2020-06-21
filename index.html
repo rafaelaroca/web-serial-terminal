@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+<head>
+<title>Web based Serial Terminal</title>
+<!--
+  term.js
+  Copyright (c) 2012-2013, Christopher Jeffrey (MIT License)
+  Copyright (c) 2016, Paul Sokolovsky
+-->
+
+<script src="term.js"></script>
+</head>
+<body>
+
+<div style="display:inline-block; vertical-align:top;">
+
+<b>Web based Serial Terminal</b>
+<br>
+
+Serial port speed: 
+<select name="speed" id="SerialSpeed">
+  <option value="1200">1200</option>
+  <option value="2400">2400</option>
+  <option value="4800">4800</option>
+  <option value="9600">9600</option>
+  <option value="19200">19200</option>
+  <option value="57600">57600</option>
+  <option value="115200">115200</option>
+</select>
+<button id="SerialConnectButton" type="button" disabled>Connect</button>
+
+<div id="term">
+</div>
+
+</div>
+
+<p> Source code: <a href=https://github.com/rafaelaroca/web-serial-terminal>https://github.com/rafaelaroca/web-serial-terminal</a> </p>
+
+<p>This page needs the "Experimental Web Platform features" (#enable-experimental-web-platform-features) enabled on Google Chrome at <a href=chrome://flags/>chrome://flags/</a></p>
+</body>
+
+<script>
+
+
+var term;
+
+function calculate_size(win) {
+    var cols = Math.max(80, Math.min(150, (win.innerWidth - 280) / 7)) | 0;
+    var rows = Math.max(24, Math.min(80, (win.innerHeight - 180) / 12)) | 0;
+    return [cols, rows];
+}
+
+(function() {
+    window.onload = function() {
+    
+      var size = calculate_size(self);
+      term = new Terminal({
+        cols: size[0],
+        rows: size[1],
+        useStyle: true,
+        screenKeys: true,
+        cursorBlink: false
+      });
+      term.open(document.getElementById("term"));
+    };
+    window.addEventListener('resize', function() {
+        var size = calculate_size(self);
+        term.resize(size[0], size[1]);
+    });
+}).call(this);
+
+
+/*
+ * Web Serial API (Google Chrome)
+ *
+ * Useful information used to this implementation:
+ * https://github.com/svendahlstrand/web-serial-api/
+ * https://dev.to/unjavascripter/the-amazing-powers-of-the-web-web-serial-api-3ilc
+ *
+ */
+
+const connectButton = document.getElementById ('SerialConnectButton');
+let port;
+
+if ('serial' in navigator) {
+  connectButton.addEventListener('click', function () {
+    if (port) {
+      term.write('\x1b[31mDisconnected from Serial Port\x1b[m\r\n');
+      port.close();
+      port = undefined;
+      connectButton.innerText = 'Connect';
+
+      document.getElementById('SerialSpeed').disabled = false;
+
+    }
+    else {
+      connectButton.innerText = 'Disconnect';
+      getReader();
+    }
+  });
+
+  connectButton.disabled = false;
+}
+else {
+  const error = document.createElement('p');
+  error.innerHTML = '<p>Support for Serial Web API not enabled. Please enable it using chrome://flags/ and enable Experimental Web Platform fetures</p>';
+
+}
+
+
+let lineBuffer = '';
+let latestValue = 0;
+
+async function serialWrite(data) {
+	encoder = new TextEncoder();
+	const dataArrayBuffer = encoder.encode(data);
+
+	if (port && port.writable) {
+		const writer = port.writable.getWriter();
+		writer.write(dataArrayBuffer);
+		writer.releaseLock();
+	}
+}
+
+async function getReader() {
+        port = await navigator.serial.requestPort({});
+	var e = document.getElementById("SerialSpeed");
+	var strSpd = e.options[e.selectedIndex].value;
+
+	if (strSpd == 115200)
+		await port.open({ baudrate: 115200 });
+	if (strSpd == 57600)
+		await port.open({ baudrate: 57600 });
+	if (strSpd == 9600)
+		await port.open({ baudrate: 9600 });
+	if (strSpd == 4800)
+		await port.open({ baudrate: 4800 });
+	if (strSpd == 2400)
+		await port.open({ baudrate: 2400 });
+	if (strSpd == 1200)
+		await port.open({ baudrate: 1200 });
+
+	document.getElementById('SerialSpeed').disabled = true;
+
+        connectButton.innerText = 'Disconnect';
+        term.write('\x1b[31mConnected using Web Serial API !\x1b[m\r\n');
+
+        const appendStream = new WritableStream({
+          write(chunk) {
+	    term.write(chunk);
+          }
+        });
+
+        port.readable
+          .pipeThrough(new TextDecoderStream())
+          .pipeTo(appendStream);
+
+
+	term.on('data', function(data) {
+            serialWrite(data);
+        });
+
+      }
+</script>
+
+</html>
+
