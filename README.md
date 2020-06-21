@@ -1,7 +1,9 @@
 # web-serial-terminal
 Fully web based serial terminal using Serial Web API - Access your serial / USB-Serial device directly from the browser!
 
-Working example: https://ain.ufscar.br/aroca/web-serial-terminal/
+Working examples: 
+https://ain.ufscar.br/aroca/web-serial-terminal/
+https://bipes.net.br/aroca/web-serial-terminal/
 
 Works on vanilla Google Chrome with Experimental Web Platform Features enabled in chrome://flags (#enable-experimental-web-platform-features)
 
