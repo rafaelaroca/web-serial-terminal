@@ -128,17 +128,17 @@ async function getReader() {
 	var strSpd = e.options[e.selectedIndex].value;
 
 	if (strSpd == 115200)
-		await port.open({ baudrate: 115200 });
+		await port.open({ baudRate: 115200 });
 	if (strSpd == 57600)
-		await port.open({ baudrate: 57600 });
+		await port.open({ baudRate: 57600 });
 	if (strSpd == 9600)
-		await port.open({ baudrate: 9600 });
+		await port.open({ baudRate: 9600 });
 	if (strSpd == 4800)
-		await port.open({ baudrate: 4800 });
+		await port.open({ baudRate: 4800 });
 	if (strSpd == 2400)
-		await port.open({ baudrate: 2400 });
+		await port.open({ baudRate: 2400 });
 	if (strSpd == 1200)
-		await port.open({ baudrate: 1200 });
+		await port.open({ baudRate: 1200 });
 
 	document.getElementById('SerialSpeed').disabled = true;
 
