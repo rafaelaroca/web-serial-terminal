@@ -24,6 +24,7 @@ Serial port speed:
   <option value="4800">4800</option>
   <option value="9600">9600</option>
   <option value="19200">19200</option>
+  <option value="38400">38400</option>
   <option value="57600">57600</option>
   <option value="115200">115200</option>
 </select>
@@ -34,9 +35,9 @@ Serial port speed:
 
 </div>
 
+<p> Use Ctrl+A+C to copy and Ctrl+A+V to paste</p>
 <p> Source code: <a href=https://github.com/rafaelaroca/web-serial-terminal>https://github.com/rafaelaroca/web-serial-terminal</a> </p>
 
-<p>This page needs the "Experimental Web Platform features" (#enable-experimental-web-platform-features) enabled on Google Chrome at <a href=chrome://flags/>chrome://flags/</a></p>
 </body>
 
 <script>
@@ -127,18 +128,8 @@ async function getReader() {
 	var e = document.getElementById("SerialSpeed");
 	var strSpd = e.options[e.selectedIndex].value;
 
-	if (strSpd == 115200)
-		await port.open({ baudrate: 115200 });
-	if (strSpd == 57600)
-		await port.open({ baudrate: 57600 });
-	if (strSpd == 9600)
-		await port.open({ baudrate: 9600 });
-	if (strSpd == 4800)
-		await port.open({ baudrate: 4800 });
-	if (strSpd == 2400)
-		await port.open({ baudrate: 2400 });
-	if (strSpd == 1200)
-		await port.open({ baudrate: 1200 });
+	var speed = parseInt(strSpd);
+	await port.open({ baudRate: [speed] });
 
 	document.getElementById('SerialSpeed').disabled = true;
 
